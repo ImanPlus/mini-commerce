@@ -56,6 +56,6 @@ management, database integration, and role-based access control.
 Clone the repository:
 
 ```bash
-git clone <REPOSITORY_URL>
+git clone https://github.com/ImanPlus/mini-commerce.git
 cd mini-commerce
 ```
