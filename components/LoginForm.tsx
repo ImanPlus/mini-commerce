@@ -6,17 +6,22 @@ import { Input } from "./ui/input";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
+import { loginSchema } from "@/lib/schemas/auth-schema";
 
 export default function LoginForm() {
   const router = useRouter();
 
   const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<
+    Partial<Record<"email" | "password", string>>
+  >({});
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     setError("");
+    setFieldErrors({});
     setIsLoading(true);
 
     const formData = new FormData(event.currentTarget);
@@ -24,30 +29,67 @@ export default function LoginForm() {
     const email = formData.get("email");
     const password = formData.get("password");
 
-    const result = await signIn("credentials", {
+    const validation = loginSchema.safeParse({
       email,
       password,
-      redirect: false,
     });
 
-    setIsLoading(false);
+    if (!validation.success) {
+      const errors = validation.error.flatten().fieldErrors;
 
-    if (result?.error) {
-      setError("Invalid email or password");
+      setFieldErrors({
+        email: errors.email?.[0],
+        password: errors.password?.[0],
+      });
+
+      setIsLoading(false);
       return;
     }
 
-    router.push("/");
-    router.refresh();
+    try {
+      const result = await signIn("credentials", {
+        email: validation.data.email,
+        password: validation.data.password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setError("Invalid email or password");
+        return;
+      }
+
+      router.push("/");
+      router.refresh();
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
+    <form
+      onSubmit={handleSubmit}
+      noValidate
+      className="w-full max-w-sm space-y-4"
+    >
       <h1 className="text-2xl font-bold">Login</h1>
 
-      <Input type="email" placeholder="Email" name="email" />
+      <div className="space-y-1">
+        <Input type="email" placeholder="Email" name="email" />
 
-      <Input type="password" placeholder="Password" name="password" />
+        {fieldErrors.email && (
+          <p className="text-sm text-destructive">{fieldErrors.email}</p>
+        )}
+      </div>
+
+      <div className="space-y-1">
+        <Input type="password" placeholder="Password" name="password" />
+
+        {fieldErrors.password && (
+          <p className="text-sm text-destructive">{fieldErrors.password}</p>
+        )}
+      </div>
 
       {error && <p className="text-sm text-destructive">{error}</p>}
 

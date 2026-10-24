@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { db } from "./src/prisma/db";
 import bcrypt from "bcryptjs";
+import { loginSchema } from "./lib/schemas/auth-schema";
 
 type UserRole = "admin" | "user";
 
@@ -24,12 +25,22 @@ export const { auth, handlers } = NextAuth({
       },
 
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          return null;
+         const validation = loginSchema.safeParse({
+          email: credentials?.email,
+          password: credentials?.password
+         })
+
+        // if (!credentials?.email || !credentials?.password) {
+        //   return null;
+        // }
+        if(!validation.success){
+          return null
         }
 
+       const { email, password } = validation.data;
+
         const user = await db.orm.public.User.first({
-          email: String(credentials.email)
+          email,
         })
 
         if (!user) {
@@ -37,7 +48,7 @@ export const { auth, handlers } = NextAuth({
         }
 
         const isPasswordValid = await bcrypt.compare(
-          String(credentials.password),
+          password,
           user.passwordHash
         )
 
