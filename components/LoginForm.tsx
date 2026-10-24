@@ -7,9 +7,11 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { loginSchema } from "@/lib/schemas/auth-schema";
+import { useCartStore } from "@/store/cart-store";
 
 export default function LoginForm() {
   const router = useRouter();
+  const clearCart = useCartStore((action) => action.clearCart);
 
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<
@@ -57,6 +59,7 @@ export default function LoginForm() {
         setError("Invalid email or password");
         return;
       }
+      clearCart();
 
       router.push("/");
       router.refresh();
