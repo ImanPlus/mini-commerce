@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import DeleteProductButton from "@/components/admin/DeleteProductButton";
 import { getProducts } from "@/lib/products-api";
 import { clsx } from "cn";
+import { PackagePlus, Store } from "lucide-react";
 import Link from "next/link";
 
 export default async function AdminProductsPage({
@@ -43,10 +44,19 @@ export default async function AdminProductsPage({
         </div>
 
         <Link
+          href="/products"
+          className="rounded-md bg-primary px-4 py-2 text-primary-foreground text-center"
+        >
+          GO to Store
+          <Store className="h-5 w-5 inline ml-2" />
+        </Link>
+
+        <Link
           href="/admin/products/new"
           className="rounded-md bg-primary px-4 py-2 text-primary-foreground text-center"
         >
           Add Product
+          <PackagePlus className="h-5 w-5 inline ml-2" />
         </Link>
       </div>
 
