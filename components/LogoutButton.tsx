@@ -19,7 +19,7 @@ export default function LogoutButton() {
     <Button
       variant="outline"
       onClick={handleLogout}
-      className="rounded-md bg-destructive px-4 py-2 text-sm text-destructive-foreground"
+      className="rounded-md bg-destructive dark:bg-destructive px-4 py-2 text-sm text-destructive-foreground"
     >
       Logout
     </Button>
